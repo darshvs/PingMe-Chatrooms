@@ -1,0 +1,82 @@
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 95vh;
+  max-height: 95vh; /* Ensure it doesn't exceed viewport height */
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto; /* Vertical scrolling only */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  padding: 10px;
+  background-color: inherit; /* Ensure it adapts to the theme */
+  box-sizing: border-box; /* Include padding in element's total width and height */
+}
+
+.message {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: flex-start; /* Align items to the top */
+  word-wrap: break-word; /* Wrap long words to prevent overflow */
+  max-width: 100%; /* Ensure messages do not exceed container width */
+  word-break: break-word; /* Break long words to prevent overflow */
+}
+
+.message .user {
+  font-weight: bold;
+}
+
+.current-user {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.current-user .user {
+  color: #007bff; /* Highlight current user's name */
+}
+
+.other-user {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.other-user .user {
+  color: #ff5722; /* Highlight other users' names */
+}
+
+.chat-form {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+  background-color: inherit; /* Ensure it adapts to the theme */
+  box-sizing: border-box; /* Include padding in element's total width and height */
+}
+
+input {
+  flex: 1;
+  margin-right: 10px;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box; /* Include padding in element's total width and height */
+}
+
+button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  transition: background-color 0.3s; /* Smooth transition for background color */
+}
+
+button:hover {
+  background-color: #0056b3; /* Darker shade for hover effect */
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

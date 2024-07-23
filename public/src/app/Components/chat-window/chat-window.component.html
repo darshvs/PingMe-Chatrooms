@@ -1,0 +1,16 @@
+<div class="chat-container">
+  <div class="messages" #messagesContainer>
+    <div *ngFor="let message of messages$ | async" 
+         [ngClass]="{ 'message': true, 'current-user': message.user === username, 'other-user': message.user !== username }">
+      <!-- <span class="user" *ngIf="message.user !== username">{{ message.user }}</span> -->
+      <p>{{ message.message }}</p>
+      <!-- <span class="user" *ngIf="message.user === username">{{ message.user }}</span> -->
+    </div>
+  </div>
+
+  <form [formGroup]="chatForm" (ngSubmit)="sendMessage()" class="chat-form">
+    <input formControlName="message" placeholder="Type your message" />
+    <button type="submit" [disabled]="chatForm.invalid">Send</button>
+  </form>
+</div>
+

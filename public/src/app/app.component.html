@@ -1,0 +1,46 @@
+<!-- app.component.html -->
+<div class="app-container">
+  <div class="left-container">
+    <div class="left-top">
+      <nav class="sidebar">
+        <div class="navbar-content">
+          <span class="navbar-item">User: {{ username }}</span>
+          <span class="navbar-item">Room: {{ currentRoom }}</span>
+          <button (click)="themeService.toggleTheme()" class="theme-toggle-btn">{{ themeService.isDark() ? 'Dark':
+            'Light' }} Theme</button>
+        </div>
+      </nav>
+    </div>
+    <div class="left-bottom">
+      <app-user-list></app-user-list>
+    </div>
+  </div>
+
+  <div class="right-container">
+    <div class="profile-section" *ngIf="!username">
+      <h2>Profile</h2>
+      <form [formGroup]="profileForm" (ngSubmit)="setUsername()">
+        <input formControlName="username" placeholder="Enter your username" />
+        <button type="submit" [disabled]="profileForm.invalid">Set Username</button>
+      </form>
+      <div *ngIf="username">
+        <p>Username: {{ username }}</p>
+      </div>
+    </div>
+
+    <div class="room-section" *ngIf="!currentRoom && username">
+      <h2>Create or Join a Room</h2>
+      <form [formGroup]="roomForm" (ngSubmit)="setRoom()">
+        <input formControlName="roomName" placeholder="Enter room name" />
+        <button type="submit" [disabled]="roomForm.invalid">Join Room</button>
+      </form>
+      <div *ngIf="currentRoom">
+        <p>Current Room: {{ currentRoom }}</p>
+      </div>
+    </div>
+
+    <div *ngIf="username && currentRoom" class="chat-section">
+      <app-chat-window [username]="username" [room]="currentRoom"></app-chat-window>
+    </div>
+  </div>
+</div>

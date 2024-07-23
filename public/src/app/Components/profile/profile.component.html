@@ -1,0 +1,12 @@
+<!-- app.component.html -->
+<div class="app-container">
+    <nav class="sidebar">
+        <div class="navbar-content">
+            <span class="navbar-item">User: {{ username }}</span>
+            <span class="navbar-item">Room: {{ room }}</span>
+            <button (click)="themeService.toggleTheme()" class="theme-toggle-btn">{{ themeService.isDark() ? 'Dark':
+                'Light' }} Theme</button>
+        </div>
+    </nav>
+
+</div>

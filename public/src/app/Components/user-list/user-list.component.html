@@ -1,0 +1,3 @@
+<ul *ngFor="let chatRoom of chatRooms">
+    <li (click)="chatService.joinRoom(chatRoom, authService.getUser());">{{ chatRoom }}</li>
+</ul>
