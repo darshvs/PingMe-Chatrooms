@@ -1,65 +1,133 @@
 const express = require('express');
 const http = require('http');
-const socketIo = require('socket.io');
-const cors = require('cors'); // Import CORS middleware
+const { Server } = require('socket.io');
 
-// Initialize Express app
 const app = express();
-const port = 3000;
+const PORT = Number(process.env.PORT) || 3000;
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:4200';
+const MAX_HISTORY = 200;
+const MAX_MESSAGE_LENGTH = 1000;
+const MAX_NAME_LENGTH = 40;
+
 const chatHistory = {};
-// Create an HTTP server
+const roomUsers = {};
+
 const server = http.createServer(app);
 
-// Initialize Socket.IO with the server
-const io = socketIo(server, {
+const io = new Server(server, {
   cors: {
-    origin: "http://localhost:4200", // Angular app's URL
-    methods: ["GET", "POST"]
+    origin: CLIENT_ORIGIN,
+    methods: ['GET', 'POST']
   }
 });
 
-// Serve static files (if you have any)
-app.use(express.static('public'));
+app.get('/health', (_req, res) => {
+  res.json({ ok: true });
+});
 
-// Handle Socket.IO connections
+function sanitizeText(value, maxLen) {
+  if (typeof value !== 'string') return '';
+  return value.replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, maxLen);
+}
+
+function isValidRoom(room) {
+  return /^[a-zA-Z0-9][a-zA-Z0-9 _-]{0,39}$/.test(room);
+}
+
 io.on('connection', (socket) => {
-  console.log('A user connected');
+  console.log('A user connected:', socket.id);
+  socket.data.username = null;
+  socket.data.room = null;
 
-  // Handle 'joinRoom' event
   socket.on('joinRoom', ({ room, username }) => {
-    socket.join(room);
-    console.log(`User ${username} joined room: ${room}`);
+    const cleanRoom = sanitizeText(room, MAX_NAME_LENGTH);
+    const cleanUser = sanitizeText(username, MAX_NAME_LENGTH);
 
-    // Send chat history to the newly joined user
-    if (chatHistory[room]) {
-      socket.emit('messageHistory', chatHistory[room]);
+    if (!cleanRoom || !cleanUser || !isValidRoom(cleanRoom)) {
+      socket.emit('errorMessage', { message: 'Invalid room or username.' });
+      return;
     }
 
-    // Optionally send a welcome message or list of messages
-    socket.to(room).emit('message', { user: 'System', message: `${username} has joined the room.` });
+    if (socket.data.room) {
+      const prev = socket.data.room;
+      socket.leave(prev);
+      if (roomUsers[prev]) {
+        roomUsers[prev] = roomUsers[prev].filter((u) => u !== socket.data.username);
+        io.to(prev).emit('roomUsers', roomUsers[prev]);
+        socket.to(prev).emit('message', {
+          user: 'System',
+          message: `${socket.data.username} left the room.`,
+          timestamp: new Date().toISOString()
+        });
+      }
+    }
+
+    socket.join(cleanRoom);
+    socket.data.room = cleanRoom;
+    socket.data.username = cleanUser;
+
+    if (!roomUsers[cleanRoom]) roomUsers[cleanRoom] = [];
+    if (!roomUsers[cleanRoom].includes(cleanUser)) {
+      roomUsers[cleanRoom].push(cleanUser);
+    }
+
+    console.log(`User ${cleanUser} joined room: ${cleanRoom}`);
+
+    socket.emit('messageHistory', chatHistory[cleanRoom] || []);
+    io.to(cleanRoom).emit('roomUsers', roomUsers[cleanRoom]);
+    socket.to(cleanRoom).emit('message', {
+      user: 'System',
+      message: `${cleanUser} has joined the room.`,
+      timestamp: new Date().toISOString()
+    });
   });
 
-  // Handle 'message' event
   socket.on('message', ({ room, username, message }) => {
-    console.log(`Message received by user ${username} in room ${room}: ${message}`);
+    const cleanRoom = sanitizeText(room, MAX_NAME_LENGTH);
+    const cleanUser = sanitizeText(username, MAX_NAME_LENGTH);
+    const cleanMessage = sanitizeText(message, MAX_MESSAGE_LENGTH);
 
-    // Save the message to chat history
-    if (!chatHistory[room]) {
-      chatHistory[room] = [];
+    if (!cleanRoom || !cleanUser || !cleanMessage) {
+      socket.emit('errorMessage', { message: 'Message could not be sent.' });
+      return;
     }
-    chatHistory[room].push({ user: username, message: message });
 
-    // Broadcast the message to the specified room
-    io.to(room).emit('message', { user: username, message: message });
+    if (socket.data.room !== cleanRoom) {
+      socket.emit('errorMessage', { message: 'Join the room before sending messages.' });
+      return;
+    }
+
+    const payload = {
+      user: cleanUser,
+      message: cleanMessage,
+      timestamp: new Date().toISOString()
+    };
+
+    if (!chatHistory[cleanRoom]) chatHistory[cleanRoom] = [];
+    chatHistory[cleanRoom].push(payload);
+    if (chatHistory[cleanRoom].length > MAX_HISTORY) {
+      chatHistory[cleanRoom] = chatHistory[cleanRoom].slice(-MAX_HISTORY);
+    }
+
+    io.to(cleanRoom).emit('message', payload);
   });
 
-  // Handle disconnection
   socket.on('disconnect', () => {
-    console.log('User disconnected');
+    const { room, username } = socket.data;
+    if (room && username && roomUsers[room]) {
+      roomUsers[room] = roomUsers[room].filter((u) => u !== username);
+      io.to(room).emit('roomUsers', roomUsers[room]);
+      socket.to(room).emit('message', {
+        user: 'System',
+        message: `${username} left the room.`,
+        timestamp: new Date().toISOString()
+      });
+    }
+    console.log('User disconnected:', socket.id);
   });
 });
 
-// Start the server
-server.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+server.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`CORS origin: ${CLIENT_ORIGIN}`);
 });

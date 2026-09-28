@@ -1,10 +1,8 @@
 import { Routes } from '@angular/router';
-import { ChatWindowComponent } from './Components/chat-window/chat-window.component';
-import { ProfileComponent } from './Components/profile/profile.component';
 
+// Main UI is hosted by AppComponent (profile → room → chat).
+// Keep lightweight routes for future expansion without breaking bootstrap.
 export const routes: Routes = [
-    { path: '', redirectTo: '/chat', pathMatch: 'full' },
-
-  { path: 'chat', component: ChatWindowComponent },
-  { path: 'profile', component: ProfileComponent },
+  { path: '', pathMatch: 'full', redirectTo: '' },
+  { path: '**', redirectTo: '' }
 ];

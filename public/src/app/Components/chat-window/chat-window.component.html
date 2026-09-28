@@ -1,16 +1,76 @@
 <div class="chat-container">
-  <div class="messages" #messagesContainer>
-    <div *ngFor="let message of messages$ | async" 
-         [ngClass]="{ 'message': true, 'current-user': message.user === username, 'other-user': message.user !== username }">
-      <!-- <span class="user" *ngIf="message.user !== username">{{ message.user }}</span> -->
-      <p>{{ message.message }}</p>
-      <!-- <span class="user" *ngIf="message.user === username">{{ message.user }}</span> -->
+  <div class="chat-header">
+    <div>
+      <strong>{{ room }}</strong>
+      <span class="subtle"> as {{ username }}</span>
     </div>
+    <span
+      class="pill"
+      [ngClass]="(connectionStatus$ | async) || 'connecting'"
+    >
+      {{
+        (connectionStatus$ | async) === 'connected'
+          ? 'Online'
+          : (connectionStatus$ | async) === 'connecting'
+            ? 'Connecting…'
+            : 'Offline'
+      }}
+    </span>
   </div>
 
-  <form [formGroup]="chatForm" (ngSubmit)="sendMessage()" class="chat-form">
-    <input formControlName="message" placeholder="Type your message" />
+  <p class="banner error" *ngIf="error$ | async as err">{{ err }}</p>
+
+  <div
+    class="messages"
+    #messagesContainer
+    (scroll)="onMessagesScroll()"
+  >
+    <ng-container *ngIf="messages$ | async as messages">
+      <div class="empty-state" *ngIf="messages.length === 0">
+        <p>No messages yet.</p>
+        <p class="subtle">Say hello — press Enter to send.</p>
+      </div>
+
+      <div
+        *ngFor="let message of messages; trackBy: trackByIndex"
+        class="message"
+        [ngClass]="{
+          'current-user': message.user === username,
+          'other-user': message.user !== username,
+          'system-message': message.user === 'System'
+        }"
+      >
+        <div class="bubble">
+          <div class="meta" *ngIf="message.user !== 'System'">
+            <span class="user">{{ message.user }}</span>
+            <span class="time" *ngIf="message.timestamp">{{
+              formatTime(message.timestamp)
+            }}</span>
+          </div>
+          <!-- Interpolation escapes HTML — do not switch to [innerHTML] -->
+          <p class="text">{{ message.message }}</p>
+          <div class="meta system-meta" *ngIf="message.user === 'System'">
+            <span class="time" *ngIf="message.timestamp">{{
+              formatTime(message.timestamp)
+            }}</span>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <form
+    [formGroup]="chatForm"
+    (ngSubmit)="sendMessage()"
+    class="chat-form"
+  >
+    <input
+      formControlName="message"
+      placeholder="Type your message and press Enter"
+      autocomplete="off"
+      maxlength="1000"
+      (keydown.enter)="$event.preventDefault(); sendMessage()"
+    />
     <button type="submit" [disabled]="chatForm.invalid">Send</button>
   </form>
 </div>
-

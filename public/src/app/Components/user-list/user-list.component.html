@@ -1,3 +1,21 @@
-<ul *ngFor="let chatRoom of chatRooms">
-    <li (click)="chatService.joinRoom(chatRoom, authService.getUser());">{{ chatRoom }}</li>
-</ul>
+<div class="panel">
+  <h3>Suggested rooms</h3>
+  <ul class="room-list">
+    <li
+      *ngFor="let chatRoom of suggestedRooms"
+      [class.active]="chatRoom === activeRoom"
+      (click)="selectRoom(chatRoom)"
+      (keyup.enter)="selectRoom(chatRoom)"
+      tabindex="0"
+      role="button"
+    >
+      {{ chatRoom }}
+    </li>
+  </ul>
+
+  <h3 *ngIf="activeRoom">People in {{ activeRoom }}</h3>
+  <ul class="user-list" *ngIf="activeRoom">
+    <li *ngFor="let user of roomUsers$ | async">{{ user }}</li>
+    <li class="empty" *ngIf="(roomUsers$ | async)?.length === 0">No one here yet</li>
+  </ul>
+</div>

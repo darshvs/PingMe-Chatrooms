@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
-import { AuthService } from '../../Services/auth.service';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { ChatService } from '../../Services/chat.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-user-list',
@@ -10,11 +10,22 @@ import { ChatService } from '../../Services/chat.service';
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.scss'
 })
-export class UserListComponent {
-  chatRooms:string[] = [];
-  constructor( public authService: AuthService,public chatService: ChatService) {
+export class UserListComponent implements OnInit {
+  @Input() activeRoom = '';
+  @Output() roomSelected = new EventEmitter<string>();
+
+  suggestedRooms: string[] = [];
+  roomUsers$: Observable<string[]>;
+
+  constructor(public chatService: ChatService) {
+    this.roomUsers$ = this.chatService.getRoomUsers();
   }
-  ngOnInit() {
-    this.chatRooms = this.chatService.getRooms();
+
+  ngOnInit(): void {
+    this.suggestedRooms = this.chatService.getSuggestedRooms();
+  }
+
+  selectRoom(room: string): void {
+    this.roomSelected.emit(room);
   }
 }

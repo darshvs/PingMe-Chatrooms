@@ -1,56 +1,128 @@
 .chat-container {
   display: flex;
   flex-direction: column;
-  height: 95vh;
-  max-height: 95vh; /* Ensure it doesn't exceed viewport height */
+  height: 100%;
+  min-height: 70vh;
+  max-height: calc(100vh - 40px);
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 4px 12px;
+  border-bottom: 1px solid rgba(127, 127, 127, 0.35);
+}
+
+.subtle {
+  opacity: 0.7;
+  font-size: 0.9rem;
+}
+
+.pill {
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.pill.connected {
+  background: rgba(46, 125, 50, 0.2);
+  color: #2e7d32;
+}
+
+.pill.connecting {
+  background: rgba(245, 124, 0, 0.2);
+  color: #ef6c00;
+}
+
+.pill.disconnected {
+  background: rgba(198, 40, 40, 0.2);
+  color: #c62828;
+}
+
+.banner.error {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(198, 40, 40, 0.15);
+  color: #c62828;
 }
 
 .messages {
   flex: 1;
-  overflow-y: auto; /* Vertical scrolling only */
-  overflow-x: hidden; /* Prevent horizontal scrolling */
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 10px;
-  background-color: inherit; /* Ensure it adapts to the theme */
-  box-sizing: border-box; /* Include padding in element's total width and height */
+  box-sizing: border-box;
+}
+
+.empty-state {
+  text-align: center;
+  margin-top: 20vh;
+  opacity: 0.75;
 }
 
 .message {
   margin-bottom: 10px;
   display: flex;
-  align-items: flex-start; /* Align items to the top */
-  word-wrap: break-word; /* Wrap long words to prevent overflow */
-  max-width: 100%; /* Ensure messages do not exceed container width */
-  word-break: break-word; /* Break long words to prevent overflow */
+  max-width: 100%;
 }
 
-.message .user {
-  font-weight: bold;
+.bubble {
+  max-width: min(70%, 520px);
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(127, 127, 127, 0.12);
+  word-break: break-word;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.user {
+  font-weight: 600;
+}
+
+.text {
+  margin: 0;
+  white-space: pre-wrap;
 }
 
 .current-user {
   justify-content: flex-end;
-  text-align: right;
 }
 
-.current-user .user {
-  color: #007bff; /* Highlight current user's name */
+.current-user .bubble {
+  background: rgba(0, 123, 255, 0.18);
 }
 
 .other-user {
   justify-content: flex-start;
-  text-align: left;
 }
 
-.other-user .user {
-  color: #ff5722; /* Highlight other users' names */
+.system-message {
+  justify-content: center;
+}
+
+.system-message .bubble {
+  background: transparent;
+  text-align: center;
+  max-width: 90%;
+  font-style: italic;
+  opacity: 0.85;
 }
 
 .chat-form {
   display: flex;
   padding: 10px;
-  border-top: 1px solid #ccc;
-  background-color: inherit; /* Ensure it adapts to the theme */
-  box-sizing: border-box; /* Include padding in element's total width and height */
+  border-top: 1px solid rgba(127, 127, 127, 0.35);
+  box-sizing: border-box;
 }
 
 input {
@@ -59,7 +131,7 @@ input {
   padding: 10px;
   border-radius: 4px;
   border: 1px solid #ccc;
-  box-sizing: border-box; /* Include padding in element's total width and height */
+  box-sizing: border-box;
 }
 
 button {
@@ -69,11 +141,10 @@ button {
   cursor: pointer;
   background-color: #007bff;
   color: white;
-  transition: background-color 0.3s; /* Smooth transition for background color */
 }
 
 button:hover {
-  background-color: #0056b3; /* Darker shade for hover effect */
+  background-color: #0056b3;
 }
 
 button:disabled {

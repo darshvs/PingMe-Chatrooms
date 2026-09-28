@@ -1,0 +1,39 @@
+.panel h3 {
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+
+.room-list,
+.user-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+
+.room-list li,
+.user-list li {
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 4px;
+}
+
+.room-list li {
+  cursor: pointer;
+  border: 1px solid rgba(127, 127, 127, 0.25);
+}
+
+.room-list li:hover,
+.room-list li:focus {
+  outline: none;
+  background: rgba(0, 123, 255, 0.12);
+}
+
+.room-list li.active {
+  background: rgba(0, 123, 255, 0.22);
+  font-weight: 600;
+}
+
+.user-list li.empty {
+  opacity: 0.65;
+  font-style: italic;
+}
